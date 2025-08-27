@@ -1,37 +1,45 @@
-import Link from "next/link";
+import HeroSection from "~/components/home/hero-section";
+import HowItWorks from "~/components/home/how-it-works";
+import DemoPreview from "~/components/home/demo-section";
+import CredibilitySection from "~/components/home/credibility-section";
+import FinalCta from "~/components/home/final-cta";
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-        </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
+    <main className="bg-background min-h-screen">
+      {/* Hero Section - Full bleed with header and main content */}
+      <HeroSection />
+
+      {/* How It Works - Centered with vertical spacing */}
+      <section id="how-it-works" className="bg-background py-20">
+        <div className="container mx-auto max-w-6xl px-6">
+          <HowItWorks />
         </div>
-      </div>
+      </section>
+
+      {/* Demo Preview - Wide centered demo card */}
+      <section className="bg-muted/30 py-20">
+        <div className="container mx-auto max-w-7xl px-6">
+          <div className="mb-12 text-center">
+            <h2 className="text-foreground mb-4 text-3xl font-bold">
+              See It In Action
+            </h2>
+            <p className="text-muted-foreground mx-auto max-w-2xl">
+              Watch how AI analyzes your request and surfaces the most relevant
+              connections from your network
+            </p>
+          </div>
+          <DemoPreview />
+        </div>
+      </section>
+
+      {/* Credibility Strip - Compact partner logos */}
+      <section className="bg-background border-border/50 border-t py-16">
+        <CredibilitySection />
+      </section>
+
+      {/* Final CTA - Full-width callout */}
+      <FinalCta />
     </main>
   );
 }
