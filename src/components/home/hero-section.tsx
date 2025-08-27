@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Linkedin, CircleFadingArrowUp } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
+import AuthDialog from "../common/auth";
 
 // Animated network background component
 const AnimatedNetwork = () => {
@@ -184,15 +184,9 @@ export default function HeroSection({
                 transition={{ duration: 0.6, delay: 0.16, ease: "easeOut" }}
                 className="flex flex-col gap-4 pt-4 sm:flex-row"
               >
-                <Button
-                  size="lg"
-                  onClick={handleSignIn}
-                  disabled={isSigningIn}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground group shadow-lg transition-all duration-200 hover:scale-[1.03] hover:shadow-xl active:scale-[0.98]"
-                >
-                  <Linkedin className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
-                  {isSigningIn ? "Signing in..." : "Sign in with LinkedIn"}
-                </Button>
+                <AuthDialog>
+                  <Button>Start reconnecting</Button>
+                </AuthDialog>
 
                 <Button
                   variant="outline"

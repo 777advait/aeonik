@@ -1,77 +1,65 @@
-"use client"
+import * as React from "react";
+import { DashIcon } from "@radix-ui/react-icons";
+import { OTPInput, type SlotProps } from "input-otp";
 
-import * as React from "react"
-import { OTPInput, OTPInputContext } from "input-otp"
-import { MinusIcon } from "lucide-react"
+import { cn } from "~/lib/utils";
 
-import { cn } from "~/lib/utils"
+const InputOTP = React.forwardRef<
+  React.ComponentRef<typeof OTPInput>,
+  React.ComponentPropsWithoutRef<typeof OTPInput>
+>(({ className, ...props }, ref) => (
+  <OTPInput
+    ref={ref}
+    containerClassName={cn(
+      "flex items-center gap-2 w-full justify-center",
+      className,
+    )}
+    {...props}
+  />
+));
+InputOTP.displayName = "InputOTP";
 
-function InputOTP({
-  className,
-  containerClassName,
-  ...props
-}: React.ComponentProps<typeof OTPInput> & {
-  containerClassName?: string
-}) {
-  return (
-    <OTPInput
-      data-slot="input-otp"
-      containerClassName={cn(
-        "flex items-center gap-2 has-disabled:opacity-50",
-        containerClassName
-      )}
-      className={cn("disabled:cursor-not-allowed", className)}
-      {...props}
-    />
-  )
-}
+const InputOTPGroup = React.forwardRef<
+  React.ComponentRef<"div">,
+  React.ComponentPropsWithoutRef<"div">
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("flex items-center", className)} {...props} />
+));
+InputOTPGroup.displayName = "InputOTPGroup";
 
-function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="input-otp-group"
-      className={cn("flex items-center", className)}
-      {...props}
-    />
-  )
-}
-
-function InputOTPSlot({
-  index,
-  className,
-  ...props
-}: React.ComponentProps<"div"> & {
-  index: number
-}) {
-  const inputOTPContext = React.useContext(OTPInputContext)
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {}
-
+const InputOTPSlot = React.forwardRef<
+  React.ComponentRef<"div">,
+  SlotProps & React.ComponentPropsWithoutRef<"div">
+>(({ char, hasFakeCaret, isActive, className, ...props }, ref) => {
   return (
     <div
-      data-slot="input-otp-slot"
-      data-active={isActive}
+      ref={ref}
       className={cn(
-        "data-[active=true]:border-ring data-[active=true]:ring-ring/50 data-[active=true]:aria-invalid:ring-destructive/20 dark:data-[active=true]:aria-invalid:ring-destructive/40 aria-invalid:border-destructive data-[active=true]:aria-invalid:border-destructive dark:bg-input/30 border-input relative flex h-9 w-9 items-center justify-center border-y border-r text-sm shadow-xs transition-all outline-none first:rounded-l-md first:border-l last:rounded-r-md data-[active=true]:z-10 data-[active=true]:ring-[3px]",
-        className
+        "border-input relative flex h-14 w-14 items-center justify-center border-y border-r text-2xl shadow-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
+        isActive && "ring-ring z-10 ring-1",
+        className,
       )}
       {...props}
     >
       {char}
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="animate-caret-blink bg-foreground h-4 w-px duration-1000" />
+          <div className="animate-caret-blink bg-foreground h-8 w-px duration-1000" />
         </div>
       )}
     </div>
-  )
-}
+  );
+});
+InputOTPSlot.displayName = "InputOTPSlot";
 
-function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
-  return (
-    <div data-slot="input-otp-separator" role="separator" {...props}>
-      <MinusIcon />
-    </div>
-  )
-}
+const InputOTPSeparator = React.forwardRef<
+  React.ComponentRef<"div">,
+  React.ComponentPropsWithoutRef<"div">
+>(({ ...props }, ref) => (
+  <div ref={ref} role="separator" {...props}>
+    <DashIcon />
+  </div>
+));
+InputOTPSeparator.displayName = "InputOTPSeparator";
 
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
+export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator };
