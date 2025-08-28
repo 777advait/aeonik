@@ -99,30 +99,6 @@ export default function HeroSection({
 }: HeroSectionProps) {
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  const handleSignIn = async () => {
-    if (isSigningIn) return;
-
-    setIsSigningIn(true);
-
-    try {
-      // Simulate loading delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      toast.success("Redirecting to LinkedIn...", {
-        duration: 2000,
-      });
-
-      // Call provided handler if available
-      if (onSignIn) {
-        onSignIn();
-      }
-    } catch (error) {
-      toast.error("Sign-in failed. Please try again.");
-    } finally {
-      setIsSigningIn(false);
-    }
-  };
-
   const handleScrollToHowItWorks = () => {
     if (onScrollToHowItWorks) {
       onScrollToHowItWorks();

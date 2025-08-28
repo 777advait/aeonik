@@ -36,10 +36,14 @@ export default function AuthDialog({
   });
 
   const { mutateAsync: generateOtp } = useMutation(
-    api.auth.generateOtp.mutationOptions(),
+    api.auth.generateOtp.mutationOptions({
+      onError: (error) => toast.error(error.message, { richColors: true }),
+    }),
   );
   const { mutateAsync: verifyOtp } = useMutation(
-    api.auth.verifyOtp.mutationOptions(),
+    api.auth.verifyOtp.mutationOptions({
+      onError: (error) => toast.error(error.message, { richColors: true }),
+    }),
   );
 
   async function handleSubmit({ email, otp }: TSignIn) {
@@ -51,7 +55,7 @@ export default function AuthDialog({
     if (step === "otp") {
       await verifyOtp({ email, token: otp! });
 
-      toast.success("Verification successful");
+      toast.success("Verification successful", { richColors: true });
 
       router.push("/chat");
 
@@ -90,7 +94,7 @@ export default function AuthDialog({
                     <Input
                       {...field}
                       disabled={step !== "email"}
-                      placeholder="advait@alignnetwork.xyz"
+                      placeholder="advait@aeonik.xyz"
                     />
                   </FormComponent.FormControl>
                   <FormComponent.FormMessage />

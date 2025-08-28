@@ -1,4 +1,4 @@
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { userSchema, type SelectUser } from "~/server/db/schema";
@@ -94,4 +94,8 @@ export const authRouter = createTRPCRouter({
 
     return { message: "Logged out successfully" };
   }),
+
+  me: protectedProcedure.query(
+    async ({ ctx: { supabase } }) => await supabase.auth.getUser(),
+  ),
 });

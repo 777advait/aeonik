@@ -8,6 +8,13 @@
       "when": 1756378694529,
       "tag": "0000_charming_princess_powerful",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756382309355,
+      "tag": "0001_uneven_earthquake",
+      "breakpoints": true
     }
   ]
 }
