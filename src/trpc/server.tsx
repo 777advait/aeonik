@@ -26,21 +26,11 @@ export const api = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${env.NEXT_PUBLIC_BASE_URL}/api/trpc`,
         transformer: superjson,
-        fetch: async (url, opts) => {
-          const cookieHeader = (await getCookies())
-            .getAll()
-            .map((cookie) => `${cookie.name}=${cookie.value}`)
-            .join("; ");
-
+        fetch(url, options) {
           return fetch(url, {
-            ...opts,
+            ...options,
             credentials: "include",
-            headers: {
-              ...opts?.headers,
-              // Add the cookie header if we have cookies
-              ...(cookieHeader && { cookie: cookieHeader }),
-            },
-          } as RequestInit);
+          });
         },
       }),
       loggerLink({

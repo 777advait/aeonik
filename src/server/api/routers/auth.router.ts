@@ -3,6 +3,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { userSchema, type SelectUser } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
+import { db } from "~/server/db";
 
 export const authRouter = createTRPCRouter({
   generateOtp: publicProcedure
@@ -94,8 +95,4 @@ export const authRouter = createTRPCRouter({
 
     return { message: "Logged out successfully" };
   }),
-
-  me: protectedProcedure.query(
-    async ({ ctx: { supabase } }) => await supabase.auth.getUser(),
-  ),
 });

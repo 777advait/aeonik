@@ -1,4 +1,5 @@
 import { pgTable, uuid, text, date } from "drizzle-orm/pg-core";
+import { userSchema } from "./user.schema";
 
 export const connectionsSchema = pgTable("connections", {
   id: uuid()
@@ -9,4 +10,10 @@ export const connectionsSchema = pgTable("connections", {
   company: text().notNull(),
   position: text().notNull(),
   connectedOn: date("connected_on").notNull(),
+  userID: uuid("user_id").references(() => userSchema.id, {
+    onDelete: "cascade",
+  }),
 });
+
+export type TSelectConnections = typeof connectionsSchema.$inferSelect;
+export type TInsertConnections = typeof connectionsSchema.$inferInsert;
