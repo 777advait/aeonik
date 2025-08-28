@@ -13,6 +13,8 @@ import { cn } from "~/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createClient } from "~/utils/supabase/client";
+import { useMutation } from "@tanstack/react-query";
+import { useTRPC } from "~/trpc/client";
 
 type SignInStep = "email" | "otp";
 
@@ -23,53 +25,31 @@ export default function AuthDialog({
 }) {
   const [open, setOpen] = React.useState(false);
   const [step, setStep] = React.useState<SignInStep>("email");
-  const [email, setEmail] = React.useState("");
-  const supabase = createClient();
   const router = useRouter();
+  const api = useTRPC();
 
   const form = useForm<TSignIn>({
     defaultValues: {
-      email,
+      email: "",
     },
     resolver: zodResolver(SSignIn),
   });
 
+  const { mutateAsync: generateOtp } = useMutation(
+    api.auth.generateOtp.mutationOptions(),
+  );
+  const { mutateAsync: verifyOtp } = useMutation(
+    api.auth.verifyOtp.mutationOptions(),
+  );
+
   async function handleSubmit({ email, otp }: TSignIn) {
     if (step === "email") {
-      const { error: generateError } = await supabase.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: true },
-      });
-
-      if (generateError) {
-        toast.error(generateError.message, { richColors: true });
-        return;
-      }
-
-      toast.success("OTP sent successfully", {
-        description: "Check your email for the verification code",
-      });
+      await generateOtp({ email });
       setStep("otp");
-      return;
     }
 
     if (step === "otp") {
-      const { error: verifyError, data: verifyData } =
-        await supabase.auth.verifyOtp({ email, token: otp!, type: "email" });
-
-      if (verifyError) {
-        form.setError(
-          "otp",
-          {
-            message: verifyError.message,
-            type: "validate",
-          },
-          {
-            shouldFocus: true,
-          },
-        );
-        return;
-      }
+      await verifyOtp({ email, token: otp! });
 
       toast.success("Verification successful");
 
