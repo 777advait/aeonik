@@ -1,32 +1,22 @@
 import * as React from "react";
-import {
-  AudioWaveform,
-  Blocks,
-  Calendar,
-  Command,
-  Home,
-  Inbox,
-  MessageCircleQuestion,
-  Search,
-  Settings2,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
 
 import { NavConnections } from "~/components/chat/nav-connections";
-import { NavMain } from "~/components/nav-main";
-import { NavSecondary } from "~/components/nav-secondary";
-import { NavWorkspaces } from "~/components/nav-workspaces";
-import { TeamSwitcher } from "~/components/team-switcher";
+import * as DialogComponent from "~/components/ui/dialog";
+
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "~/components/ui/sidebar";
 import { NavUser } from "./nav-user";
 import { createClient } from "~/utils/supabase/server";
 import { db } from "~/server/db";
+import { Plus } from "lucide-react";
+import UploadArea from "./upload-area";
 
 // This is sample data.
 
@@ -51,6 +41,30 @@ export async function SidebarLeft({
         />
       </SidebarHeader>
       <SidebarContent>
+        <SidebarMenu className="px-2">
+          <SidebarMenuItem>
+            <DialogComponent.Dialog>
+              <DialogComponent.DialogTrigger asChild>
+                <SidebarMenuButton>
+                  <Plus />
+                  Add Connections
+                </SidebarMenuButton>
+              </DialogComponent.DialogTrigger>
+              <DialogComponent.DialogContent>
+                <DialogComponent.DialogHeader>
+                  <DialogComponent.DialogTitle>
+                    Upload Your LinkedIn Connections
+                  </DialogComponent.DialogTitle>
+                  <DialogComponent.DialogDescription>
+                    Import your LinkedIn connections to discover powerful
+                    opportunities and expand your professional network
+                  </DialogComponent.DialogDescription>
+                </DialogComponent.DialogHeader>
+                <UploadArea />
+              </DialogComponent.DialogContent>
+            </DialogComponent.Dialog>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <NavConnections connections={connections} />
       </SidebarContent>
       <SidebarRail />
