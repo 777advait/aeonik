@@ -6,8 +6,12 @@ import {
   SidebarTrigger,
 } from "~/components/ui/sidebar";
 import Chat from "~/components/chat/chat";
+import { api, batchPrefetch } from "~/trpc/server";
+
+export const dynamic = "force-dynamic";
 
 export default function Page() {
+  batchPrefetch([api.auth.me.queryOptions()]);
   return (
     <SidebarProvider>
       <SidebarLeft />

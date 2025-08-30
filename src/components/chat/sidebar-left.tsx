@@ -24,7 +24,7 @@ import { api, batchPrefetch } from "~/trpc/server";
 export async function SidebarLeft({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  batchPrefetch([api.auth.me.queryOptions()]);
+  
   // const connections = await db.query.connectionsSchema.findMany({
   //   where: ({ userID }, { eq }) => eq(userID, user!.id),
   // });

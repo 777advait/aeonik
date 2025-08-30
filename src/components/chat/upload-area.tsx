@@ -7,6 +7,7 @@ import Papa from "papaparse";
 import { inngest } from "~/inngest/client";
 import { useQuery } from "@tanstack/react-query";
 import { useTRPC } from "~/trpc/client";
+import { uploadConnection } from "~/inngest/upload-connection";
 
 interface CSVUploadComponentProps {
   onUpload?: (file: File) => Promise<void>;
@@ -100,27 +101,10 @@ export const CSVUploadComponent = ({
 
   const handleFileSelect = useCallback(
     async (file: File) => {
-      const validation = validateFile(file);
-
-      if (!validation.valid) {
-        setState("error");
-        setError(validation.error || "Invalid file");
-        return;
-      }
-
-      const fileInfo: FileData = {
-        file,
-        name: file.name,
-        size: formatFileSize(file.size),
-      };
-
-      setFileData(fileInfo);
-      setError("");
       setState("uploading");
       setProgress(0);
+      setError("");
 
-      let processedCount = 0;
-      let totalRows = 0;
       let rows: {
         "First Name": string;
         "Last Name": string;
@@ -142,18 +126,12 @@ export const CSVUploadComponent = ({
       }>(file, {
         header: true,
         skipEmptyLines: true,
-
-        step: (row, parser) => {
-          // Collect rows as they come
-          rows.push(row.data);
-        },
-
+        step: (row) => rows.push(row.data),
         complete: async () => {
-          totalRows = rows.length;
+          const totalRows = rows.length;
+          let processed = 0;
 
-          for (let i = 0; i < rows.length; i++) {
-            const row = rows[i]!;
-
+          for (const row of rows) {
             const requiredFields = [
               row["First Name"],
               row["Last Name"],
@@ -163,23 +141,19 @@ export const CSVUploadComponent = ({
               row.Position,
             ];
 
-            if (
-              requiredFields.some((field) => !field || field.trim?.() === "")
-            ) {
+            if (requiredFields.some((f) => !f || f.trim?.() === "")) {
               continue;
             }
 
             try {
-              await inngest.send({
-                name: "connection/add",
-                data: {
-                  name: `${row["First Name"]} ${row["Last Name"]} `,
-                  company: row.Company,
-                  connectedOn: row["Connected On"],
-                  linkedinURL: row.URL,
-                  position: row.Position,
-                  userID: user.id,
-                },
+              await uploadConnection({
+                firstName: row["First Name"],
+                lastName: row["Last Name"],
+                url: row.URL,
+                company: row.Company,
+                position: row.Position,
+                connectedOn: row["Connected On"],
+                userID: user.id,
               });
             } catch (err) {
               console.error("Error sending row:", err);
@@ -188,16 +162,15 @@ export const CSVUploadComponent = ({
               return;
             }
 
-            processedCount++;
-            const progress = Math.round((processedCount / totalRows) * 100);
-            setProgress(progress);
+            processed++;
+            setProgress(Math.round((processed / totalRows) * 100));
           }
 
           setState("success");
         },
       });
     },
-    [simulateUpload],
+    [user.id],
   );
 
   // const handleFileSelect = useCallback(
