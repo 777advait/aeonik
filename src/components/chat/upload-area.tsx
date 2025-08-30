@@ -484,14 +484,17 @@ export const CSVUploadComponent = ({
       </AnimatePresence>
 
       <p className="text-muted-foreground text-center text-sm">
-        Don't know how to get connections csv? Click{" "}
+        <b>Note</b>: Connections may take a few moments to process before
+        appearing in the sidebar. Don't know how to get connections csv?{" "}
         <a
           className="underline underline-offset-2"
           href="https://www.linkedin.com/mypreferences/d/download-my-data"
         >
-          here
+          Click here
         </a>
+        .
       </p>
+      {/* <p className="text-muted-foreground text-center text-sm"></p> */}
     </div>
   );
 };

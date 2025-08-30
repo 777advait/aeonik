@@ -17,10 +17,28 @@ import {
 import { Message, MessageContent } from "~/components/ai-elements/message";
 import { Response } from "~/components/ai-elements/response";
 import { SidebarTrigger } from "../ui/sidebar";
-import type { UIMessage } from "@ai-sdk/react";
+import { useChat, type UIMessage } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+import { env } from "~/env";
 
 export default function Chat() {
-  const messages: UIMessage[] = [];
+  const [message, setMessage] = React.useState("");
+  const { messages, sendMessage } = useChat({
+    transport: new DefaultChatTransport({
+      api: `${env.NEXT_PUBLIC_BASE_URL}/api/chat`,
+      credentials: "include",
+    }),
+  });
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    sendMessage({
+      parts: [{ type: "text", text: message }],
+    });
+
+    setMessage("");
+  }
   return (
     <div className="flex h-full flex-col">
       <Conversation>
@@ -47,8 +65,11 @@ export default function Chat() {
         <ConversationScrollButton />
       </Conversation>
 
-      <PromptInput className="mt-4">
-        <PromptInputTextarea />
+      <PromptInput onSubmit={handleSubmit} className="mt-4">
+        <PromptInputTextarea
+          onChange={(e) => setMessage(e.target.value)}
+          value={message}
+        />
         <PromptInputToolbar className="flex justify-end">
           <PromptInputSubmit />
         </PromptInputToolbar>

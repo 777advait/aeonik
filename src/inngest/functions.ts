@@ -1,7 +1,7 @@
 import { db } from "~/server/db";
 import { inngest } from "./client";
 import { connectionsSchema } from "~/server/db/schema";
-import { embed, generateText } from "ai";
+import { generateText } from "ai";
 import { createEmbedding } from "~/ai-core/embedding";
 import { model } from "~/ai-core/model";
 import { linkedinScraper } from "~/services/linkedin-scraper";
@@ -70,7 +70,9 @@ export const connectionAdd = inngest.createFunction(
 
       const { embedding } = await createEmbedding(profileSummary);
 
-      await db.insert(connectionsSchema).values({ ...event.data, embedding });
+      await db
+        .insert(connectionsSchema)
+        .values({ ...event.data, summary: profileSummary, embedding });
     });
   },
 );

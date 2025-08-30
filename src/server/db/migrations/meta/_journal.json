@@ -36,6 +36,13 @@
       "when": 1756532635262,
       "tag": "0004_spicy_sugar_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1756542709506,
+      "tag": "0005_vengeful_magma",
+      "breakpoints": true
     }
   ]
 }

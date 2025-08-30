@@ -1,0 +1,1 @@
+ALTER TABLE "connections" ADD COLUMN "summary" text NOT NULL;

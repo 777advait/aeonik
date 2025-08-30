@@ -34,8 +34,6 @@ export const api = createTRPCOptionsProxy<AppRouter>({
             data: { session },
           } = await supabase.auth.getSession();
 
-          console.log("server.tsx", session);
-
           return {
             Authorization: `Bearer ${session?.access_token}`,
           };

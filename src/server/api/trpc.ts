@@ -27,7 +27,6 @@ import { createClient } from "~/utils/supabase/server";
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const supabase = await createClient();
-
   return {
     db,
     supabase,
@@ -106,7 +105,7 @@ const authenticatedMiddleware = t.middleware(async ({ ctx, next }) => {
   if (error) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "lol",
+      message: error.message,
     });
   }
 

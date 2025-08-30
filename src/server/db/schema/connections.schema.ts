@@ -18,6 +18,7 @@ export const connectionsSchema = pgTable(
       })
       .notNull(),
     embedding: vector({ dimensions: 1536 }).notNull(),
+    summary: text().notNull(),
   },
   (table) => [
     index("embeddingIdx").using(

@@ -26,11 +26,11 @@ export const searchSimilarConnections = async (
     .limit(4);
 };
 
-console.log(
-  await searchSimilarConnections(
-    "want to connect with founders in b2b ai saas space",
-    "1e9ce5d9-8993-409c-9b0c-9c2a5087dca6",
-  ),
-);
+// console.log(
+//   await searchSimilarConnections(
+//     "want to connect with founders in b2b ai saas space",
+//     "1e9ce5d9-8993-409c-9b0c-9c2a5087dca6",
+//   ),
+// );
 
-db.$client.end();
+// db.$client.end();

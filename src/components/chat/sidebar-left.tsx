@@ -24,7 +24,6 @@ import { api, batchPrefetch } from "~/trpc/server";
 export async function SidebarLeft({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  
   // const connections = await db.query.connectionsSchema.findMany({
   //   where: ({ userID }, { eq }) => eq(userID, user!.id),
   // });
@@ -58,7 +57,7 @@ export async function SidebarLeft({
             </DialogComponent.Dialog>
           </SidebarMenuItem>
         </SidebarMenu>
-        {/* <NavConnections connections={connections} /> */}
+        <NavConnections />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
