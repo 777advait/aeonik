@@ -1,0 +1,1 @@
+ALTER TABLE "connections" ALTER COLUMN "user_id" SET NOT NULL;

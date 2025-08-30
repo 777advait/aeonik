@@ -19,9 +19,11 @@
     "preview": "next build && next start",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "ui:add": "bunx shadcn@latest add"
+    "ui:add": "bunx shadcn@latest add",
+    "inngest:dev": "bunx inngest-cli@latest dev"
   },
   "dependencies": {
+    "@ai-sdk/azure": "^2.0.23",
     "@ai-sdk/react": "^2.0.27",
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -67,6 +69,7 @@
     "drizzle-orm": "^0.41.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.12",
+    "inngest": "^3.40.1",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.542.0",
     "motion": "^12.23.12",

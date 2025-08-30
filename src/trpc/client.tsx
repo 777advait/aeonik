@@ -8,6 +8,8 @@ import { useState } from "react";
 import { makeQueryClient } from "./query-client";
 import type { AppRouter } from "~/server/api/root";
 import superjson from "superjson";
+import { env } from "~/env";
+import { createClient } from "~/utils/supabase/client";
 export const { TRPCProvider, useTRPC } = createTRPCContext<AppRouter>();
 let browserQueryClient: QueryClient;
 function getQueryClient() {
@@ -45,12 +47,17 @@ export function TRPCReactProvider(
       links: [
         httpBatchLink({
           transformer: superjson,
-          url: getUrl(),
-          fetch(url, options) {
-            return fetch(url, {
-              ...options,
-              credentials: "include",
-            });
+          url: `${env.NEXT_PUBLIC_BASE_URL}/api/trpc`,
+          async headers() {
+            const supabase = createClient();
+
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
+
+            return {
+              Authorization: `Bearer ${session?.access_token}`,
+            };
           },
         }),
       ],

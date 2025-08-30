@@ -80,19 +80,11 @@ export const authRouter = createTRPCRouter({
       return { message: "OTP verified successfully", data: existingUser };
     }),
 
-  logout: publicProcedure.mutation(async ({ ctx }) => {
-    const {
-      data: { user },
-    } = await ctx.supabase.auth.getUser();
-
-    if (!user) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-      });
-    }
-
+  logout: protectedProcedure.mutation(async ({ ctx }) => {
     await ctx.supabase.auth.signOut();
 
     return { message: "Logged out successfully" };
   }),
+
+  me: protectedProcedure.query(async ({ ctx: { user } }) => user),
 });

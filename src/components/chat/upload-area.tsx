@@ -4,6 +4,9 @@ import { useState, useRef, useCallback } from "react";
 import { Upload, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Papa from "papaparse";
+import { inngest } from "~/inngest/client";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "~/trpc/client";
 
 interface CSVUploadComponentProps {
   onUpload?: (file: File) => Promise<void>;
@@ -47,6 +50,10 @@ export const CSVUploadComponent = ({
   const [fileData, setFileData] = useState<FileData | null>(null);
   const [error, setError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const api = useTRPC();
+  const { data: user, error: userError } = useQuery(api.auth.me.queryOptions());
+
+  if (!user || userError) return null;
 
   const resetState = useCallback(() => {
     setState("idle");
@@ -109,20 +116,124 @@ export const CSVUploadComponent = ({
 
       setFileData(fileInfo);
       setError("");
+      setState("uploading");
+      setProgress(0);
 
-      Papa.parse(file, {
-        header: true, // set false if you don’t want first row as keys
+      let processedCount = 0;
+      let totalRows = 0;
+      let rows: {
+        "First Name": string;
+        "Last Name": string;
+        URL: string;
+        "Email Address": string;
+        Company: string;
+        Position: string;
+        "Connected On": string;
+      }[] = [];
+
+      Papa.parse<{
+        "First Name": string;
+        "Last Name": string;
+        URL: string;
+        "Email Address": string;
+        Company: string;
+        Position: string;
+        "Connected On": string;
+      }>(file, {
+        header: true,
         skipEmptyLines: true,
-        complete: (results) => {
-          console.log("Parsed CSV:", results.data);
-          console.log("Errors:", results.errors);
+
+        step: (row, parser) => {
+          // Collect rows as they come
+          rows.push(row.data);
+        },
+
+        complete: async () => {
+          totalRows = rows.length;
+
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i]!;
+
+            const requiredFields = [
+              row["First Name"],
+              row["Last Name"],
+              row.Company,
+              row["Connected On"],
+              row.URL,
+              row.Position,
+            ];
+
+            if (
+              requiredFields.some((field) => !field || field.trim?.() === "")
+            ) {
+              continue;
+            }
+
+            try {
+              await inngest.send({
+                name: "connection/add",
+                data: {
+                  name: `${row["First Name"]} ${row["Last Name"]} `,
+                  company: row.Company,
+                  connectedOn: row["Connected On"],
+                  linkedinURL: row.URL,
+                  position: row.Position,
+                  userID: user.id,
+                },
+              });
+            } catch (err) {
+              console.error("Error sending row:", err);
+              setState("error");
+              setError("Error while processing rows");
+              return;
+            }
+
+            processedCount++;
+            const progress = Math.round((processedCount / totalRows) * 100);
+            setProgress(progress);
+          }
+
+          setState("success");
         },
       });
-
-      await simulateUpload(file);
     },
     [simulateUpload],
   );
+
+  // const handleFileSelect = useCallback(
+  //   async (file: File) => {
+  //     // Validate file
+  //     const validation = validateFile(file);
+  //     if (!validation.valid) {
+  //       setState("error");
+  //       setError(validation.error || "Invalid file");
+  //       return;
+  //     }
+
+  //     // Prepare file info
+  //     const fileInfo: FileData = {
+  //       file,
+  //       name: file.name,
+  //       size: formatFileSize(file.size),
+  //     };
+
+  //     setFileData(fileInfo);
+  //     setError("");
+
+  //     // Parse CSV
+  //     Papa.parse<TInsertConnections>(file, {
+  //       header: true, // set false if you don’t want first row as keys
+  //       skipEmptyLines: true,
+  //       complete: async (results) => {
+  //         console.log(results);
+  //       },
+  //     });
+
+  //     // Simulate upload progress
+  //     await simulateUpload(file);
+  //   },
+  //   [simulateUpload],
+  // );
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {

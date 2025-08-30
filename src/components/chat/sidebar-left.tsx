@@ -17,28 +17,21 @@ import { createClient } from "~/utils/supabase/server";
 import { db } from "~/server/db";
 import { Plus } from "lucide-react";
 import UploadArea from "./upload-area";
+import { api, batchPrefetch } from "~/trpc/server";
 
 // This is sample data.
 
 export async function SidebarLeft({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const connections = await db.query.connectionsSchema.findMany({
-    where: ({ userID }, { eq }) => eq(userID, user!.id),
-  });
+  batchPrefetch([api.auth.me.queryOptions()]);
+  // const connections = await db.query.connectionsSchema.findMany({
+  //   where: ({ userID }, { eq }) => eq(userID, user!.id),
+  // });
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <NavUser
-          user={{
-            email: user?.email as string,
-            avatar: "/avatars/shadcn.jpg",
-          }}
-        />
+        <NavUser />
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu className="px-2">
@@ -65,7 +58,7 @@ export async function SidebarLeft({
             </DialogComponent.Dialog>
           </SidebarMenuItem>
         </SidebarMenu>
-        <NavConnections connections={connections} />
+        {/* <NavConnections connections={connections} /> */}
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

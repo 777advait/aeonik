@@ -12,7 +12,6 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { cn } from "~/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { createClient } from "~/utils/supabase/client";
 import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "~/trpc/client";
 
@@ -106,7 +105,7 @@ export default function AuthDialog({
               name="otp"
               render={({ field }) => (
                 <FormComponent.FormItem
-                  className={cn({ hidden: step !== "otp" })}
+                  className={cn("space-y-1", { hidden: step !== "otp" })}
                 >
                   <FormComponent.FormLabel>
                     Verification Code

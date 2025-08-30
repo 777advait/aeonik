@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import {
   BadgeCheck,
   Bell,
@@ -31,17 +31,24 @@ import {
 import { useTRPC } from "~/trpc/client";
 import { createClient } from "~/utils/supabase/client";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    email: string;
-    avatar: string;
-  };
-}) {
+export function NavUser() {
   const { isMobile } = useSidebar();
-  const supabase = createClient();
   const router = useRouter();
+  const api = useTRPC();
+  const { mutateAsync: logout } = useMutation(
+    api.auth.logout.mutationOptions({
+      onSuccess: () => {
+        toast.success("Signed out successfully", { richColors: true });
+        router.push("/");
+      },
+      onError: (error) =>
+        toast.error("Failed to sign out", {
+          richColors: true,
+          description: error.message,
+        }),
+    }),
+  );
+  const { data: user } = useSuspenseQuery(api.auth.me.queryOptions());
 
   return (
     <SidebarMenu>
@@ -53,7 +60,7 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} />
+                <AvatarImage src="/shadcn.jpg" />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -71,7 +78,7 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} />
+                  <AvatarImage src="/shadcn.jpg" />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -103,19 +110,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={async () => {
-                const toastId = toast.loading("Logging out...", {
-                  richColors: true,
-                });
-                const { error } = await supabase.auth.signOut();
-
-                if (error) {
-                  toast.error(error.message, { id: toastId });
-                  return;
-                }
-                toast.success("Logged out successfully", { id: toastId });
-                router.push("/");
-              }}
+              onClick={async () => await logout()}
               variant="destructive"
             >
               <LogOut />
