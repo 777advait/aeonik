@@ -96,7 +96,6 @@ export const CSVUploadComponent = ({
       }
 
       setState("success");
-      queryClient.invalidateQueries(api.connections.all.queryOptions());
     },
     [onUpload],
   );
@@ -169,6 +168,7 @@ export const CSVUploadComponent = ({
           }
 
           setState("success");
+          queryClient.invalidateQueries(api.connections.all.queryOptions());
         },
       });
     },
