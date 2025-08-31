@@ -29,6 +29,8 @@ type Languages = {
 type Geo = { full: string };
 
 export type Profile = {
+  firstName: string;
+  lastName: string;
   summary: string;
   headline: string;
   educations?: Educations[];

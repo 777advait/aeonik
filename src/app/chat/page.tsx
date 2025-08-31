@@ -29,7 +29,6 @@ export default function Page() {
             <Chat />
           </div>
         </SidebarInset>
-        <SidebarRight />
       </SidebarProvider>
     </HydrateClient>
   );
