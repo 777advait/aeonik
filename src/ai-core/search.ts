@@ -18,10 +18,11 @@ export const searchSimilarConnections = async (
       name: connectionsSchema.name,
       position: connectionsSchema.position,
       connectedOn: connectionsSchema.connectedOn,
+      summary: connectionsSchema.summary,
       similarity,
     })
     .from(connectionsSchema)
-    .where(and(gt(similarity, 0.5), eq(connectionsSchema.userID, userID)))
+    .where(eq(connectionsSchema.userID, userID))
     .orderBy((t) => desc(t.similarity))
     .limit(4);
 };
