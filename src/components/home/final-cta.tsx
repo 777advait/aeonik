@@ -13,7 +13,7 @@ export default function FinalCta() {
 
   return (
     <section className="bg-background w-full py-20 lg:py-24">
-      <div className="container max-w-4xl">
+      <div className="container mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
