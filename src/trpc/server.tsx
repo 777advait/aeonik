@@ -1,3 +1,5 @@
+// src/trpc/server.tsx
+
 import "server-only";
 
 import type { AppRouter } from "~/server/api/root";
@@ -14,7 +16,6 @@ import superjson from "superjson";
 import { makeQueryClient } from "./query-client";
 import { env } from "~/env";
 import { cookies as getCookies } from "next/headers";
-import { createClient } from "~/utils/supabase/server";
 
 // IMPORTANT: Create a stable getter for the query client that
 //            will return the same client during the same request.
@@ -27,15 +28,10 @@ export const api = createTRPCOptionsProxy<AppRouter>({
       httpBatchLink({
         url: `${env.NEXT_PUBLIC_BASE_URL}/api/trpc`,
         transformer: superjson,
-        async headers() {
-          const supabase = await createClient();
-
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-
+        headers: async () => {
+          const cookieStore = await getCookies();
           return {
-            Authorization: `Bearer ${session?.access_token}`,
+            cookie: cookieStore.toString(),
           };
         },
       }),

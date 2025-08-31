@@ -56,7 +56,7 @@ export default function AuthDialog({
 
       toast.success("Verification successful", { richColors: true });
 
-      router.push("/chat");
+      router.push("/onboard");
 
       setOpen(false);
 

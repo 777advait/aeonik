@@ -1,18 +1,18 @@
-import type { TSelectConnections } from "~/server/db/schema";
 import * as CardComponent from "../ui/card";
 import { cn } from "~/lib/utils";
+import type { TSearchConnectionsTool } from "~/ai-core/types";
 
 export default function ProfileCard({
   profile,
   className,
 }: {
-  profile: Omit<TSelectConnections, "embedding" | "userID" | "id">;
+  profile: TSearchConnectionsTool["output"][number];
   className?: string;
 }) {
   return (
     <CardComponent.Card
       className={cn(
-        "w-[260px] flex-none rounded-xl border sm:w-[300px] md:w-[340px]",
+        "w-[260px] flex-none cursor-pointer rounded-xl border sm:w-[300px] md:w-[340px]",
         className,
       )}
     >
@@ -24,13 +24,11 @@ export default function ProfileCard({
           {profile.position} • {profile.company}
         </CardComponent.CardDescription>
       </CardComponent.CardHeader>
-
-      <CardComponent.CardFooter className="">
-        <div className="text-muted-foreground text-sm">
-          <span className="text-foreground font-medium">Connected On:</span>{" "}
-          {profile.connectedOn}
-        </div>
-      </CardComponent.CardFooter>
+      <CardComponent.CardContent>
+        <p className="text-foreground/75 line-clamp-4 font-medium">
+          {profile.reason}
+        </p>
+      </CardComponent.CardContent>
     </CardComponent.Card>
   );
 }

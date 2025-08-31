@@ -1,60 +1,47 @@
-import { env } from "~/env";
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-const protectedRoutes = ["/chat"];
+import { createClient } from "./server";
+import { db } from "~/server/db";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  const supabase = await createClient();
+  const pathname = request.nextUrl.pathname;
 
-  const supabase = createServerClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value),
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
-        },
-      },
-    },
-  );
-
-  // refreshing the auth token
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    !user &&
-    protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
+  // --- CASE 1: Not authenticated ---
+  if (!user) {
+    if (pathname !== "/") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
   }
 
-  if (
-    user &&
-    !protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
-  ) {
+  // --- CASE 2: Authenticated but not onboarded ---
+  const userRecord = await db.query.userSchema.findFirst({
+    where: ({ id }, { eq }) => eq(id, user.id),
+    columns: { onboarded: true },
+  });
+  const isOnboarded = userRecord?.onboarded || false;
+
+  if (!isOnboarded) {
+    if (pathname !== "/onboard") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboard";
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
+  // --- CASE 3: Authenticated and onboarded ---
+  if (pathname !== "/chat") {
     const url = request.nextUrl.clone();
     url.pathname = "/chat";
     return NextResponse.redirect(url);
   }
 
-  return supabaseResponse;
+  return NextResponse.next();
 }

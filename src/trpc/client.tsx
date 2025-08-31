@@ -48,17 +48,6 @@ export function TRPCReactProvider(
         httpBatchLink({
           transformer: superjson,
           url: `${env.NEXT_PUBLIC_BASE_URL}/api/trpc`,
-          async headers() {
-            const supabase = createClient();
-
-            const {
-              data: { session },
-            } = await supabase.auth.getSession();
-
-            return {
-              Authorization: `Bearer ${session?.access_token}`,
-            };
-          },
         }),
       ],
     }),

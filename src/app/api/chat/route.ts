@@ -7,6 +7,7 @@ import {
 import type { NextRequest } from "next/server";
 import { model } from "~/ai-core/model";
 import { makeSearchConnectionsTool } from "~/ai-core/tools/search-connections";
+import { db } from "~/server/db";
 import { createClient } from "~/utils/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -19,11 +20,15 @@ export async function POST(req: NextRequest) {
 
   if (error || !user) throw new Error("UNAUTHORIZED");
 
+  const dbUser = (await db.query.userSchema.findFirst({
+    where: ({ id }, { eq }) => eq(id, user.id),
+  }))!;
+
   const res = streamText({
     model,
     prompt: convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
-    system: `You are a professional AI assistant specialized in helping users find relevant connections from their network. 
+    system: `You are aeonik, a professional AI assistant specialized in helping users find relevant connections from their network and reconnect with them. 
 
 Your job is to:
 1. Search through semantic profiles of the user's connections.
@@ -33,7 +38,7 @@ Your job is to:
 5. After listing the suggested connections, include 1-2 sentences summarizing *why* they were chosen.
 6. Be concise, professional, and avoid making assumptions beyond the data in the user's semantic profiles.
 `,
-    tools: { searchConnections: makeSearchConnectionsTool(user.id) },
+    tools: { searchConnections: makeSearchConnectionsTool(dbUser) },
   });
 
   return res.toUIMessageStreamResponse();

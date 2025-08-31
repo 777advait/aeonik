@@ -22,7 +22,7 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 
 export default function Chat() {
   const [message, setMessage] = React.useState("");
-  const { messages, sendMessage } = useChat<ChatMessage>({
+  const { messages, sendMessage, status } = useChat<ChatMessage>({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       credentials: "include",
@@ -57,8 +57,11 @@ export default function Chat() {
 
                       case "tool-searchConnections":
                         if (part.state === "output-available") {
-                          return (
-                            <div className="space-y-2 py-4">
+                          return part.output.length > 0 ? (
+                            <div
+                              key={`${message.id}-${part.type}-${i}`}
+                              className="space-y-2 py-4"
+                            >
                               <ScrollArea
                                 className="w-full py-2"
                                 aria-label="Profiles carousel"
@@ -82,9 +85,16 @@ export default function Chat() {
                                 Scroll to see more &rarr;
                               </p>
                             </div>
-                          );
+                          ) : null;
                         }
                         return null;
+
+                      case "reasoning":
+                        return (
+                          <p className="text-muted-foreground animate-pulse text-sm">
+                            {part.text}
+                          </p>
+                        );
 
                       default:
                         return null;
@@ -105,7 +115,7 @@ export default function Chat() {
             value={message}
           />
           <PromptInputToolbar className="flex justify-end">
-            <PromptInputSubmit />
+            <PromptInputSubmit status={status} />
           </PromptInputToolbar>
         </PromptInput>
       </div>

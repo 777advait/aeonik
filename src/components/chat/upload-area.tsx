@@ -5,7 +5,7 @@ import { Upload, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Papa from "papaparse";
 import { inngest } from "~/inngest/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "~/trpc/client";
 import { uploadConnection } from "~/inngest/upload-connection";
 
@@ -50,6 +50,7 @@ export const CSVUploadComponent = ({
   const [progress, setProgress] = useState(0);
   const [fileData, setFileData] = useState<FileData | null>(null);
   const [error, setError] = useState<string>("");
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const api = useTRPC();
   const { data: user, error: userError } = useQuery(api.auth.me.queryOptions());
@@ -95,6 +96,7 @@ export const CSVUploadComponent = ({
       }
 
       setState("success");
+      queryClient.invalidateQueries(api.connections.all.queryOptions());
     },
     [onUpload],
   );

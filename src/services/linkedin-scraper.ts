@@ -28,7 +28,7 @@ type Languages = {
 
 type Geo = { full: string };
 
-type Profile = {
+export type Profile = {
   summary: string;
   headline: string;
   educations?: Educations[];

@@ -1,9 +1,10 @@
-import { tool } from "ai";
+import { generateText, tool } from "ai";
 import z from "zod";
 import { searchSimilarConnections } from "../search";
-import { createClient } from "~/utils/supabase/server";
+import type { TSelectUser } from "~/server/db/schema";
+import { model } from "../model";
 
-export const makeSearchConnectionsTool = (userID: string) =>
+export const makeSearchConnectionsTool = (user: TSelectUser) =>
   tool({
     args: { name: "search-connections" },
     description: "Search for relevant semantic profiles of user's connections",
@@ -11,8 +12,35 @@ export const makeSearchConnectionsTool = (userID: string) =>
       query: z.string().describe("The query to search connections for"),
     }),
     execute: async ({ query }) => {
-      const connections = searchSimilarConnections(query, userID);
+      const connections = await searchSimilarConnections(query, user);
 
-      return connections;
+      const withReasons = await Promise.all(
+        connections.map(async (res) => {
+          const { text: reason } = await generateText({
+            model,
+            system: `You are an assistant that explains why a user's connection is relevant.`,
+            prompt: `
+User profile: ${res.userSummary}
+Search query: ${query}
+Connection profile:
+  - Name: ${res.name}
+  - Position: ${res.position} at ${res.company}
+  - Summary: ${res.summary}
+
+Scores:
+  - Query similarity: ${res.querySimilarity}
+  - User similarity: ${res.userSimilarity}
+
+Concisely explain in 1-2 sentences why this connection matches, highlighting overlap with the query and/or user's background. Be clear and human-sounding.`,
+          });
+
+          return {
+            ...res,
+            reason,
+          };
+        }),
+      );
+
+      return withReasons;
     },
   });

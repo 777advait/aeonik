@@ -4,6 +4,14 @@ import { TRPCError } from "@trpc/server";
 import { userSchema, type SelectUser } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { db } from "~/server/db";
+import { linkedinScraper } from "~/services/linkedin-scraper";
+import {
+  PROFILE_SUMMARY_SYSTEM_PROMPT,
+  getProfileSummaryUserPrompt,
+} from "~/ai-core/prompts";
+import { model } from "~/ai-core/model";
+import { generateText } from "ai";
+import { createEmbedding } from "~/ai-core/embedding";
 
 export const authRouter = createTRPCRouter({
   generateOtp: publicProcedure
@@ -87,4 +95,29 @@ export const authRouter = createTRPCRouter({
   }),
 
   me: protectedProcedure.query(async ({ ctx: { user } }) => user),
+
+  onboard: protectedProcedure
+    .input(z.object({ linkedinUrl: z.url() }))
+    .mutation(async ({ ctx: { user, db }, input: { linkedinUrl } }) => {
+      const profile = await linkedinScraper.fetchProfile(linkedinUrl);
+
+      const userPrompt = getProfileSummaryUserPrompt(profile);
+
+      const { text: profileSummary } = await generateText({
+        model,
+        system: PROFILE_SUMMARY_SYSTEM_PROMPT,
+        prompt: userPrompt,
+      });
+
+      const { embedding } = await createEmbedding(profileSummary);
+
+      try {
+        await db
+          .update(userSchema)
+          .set({ summary: profileSummary, embedding, onboarded: true })
+          .where(eq(userSchema.id, user.id));
+      } catch (err) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", cause: err });
+      }
+    }),
 });

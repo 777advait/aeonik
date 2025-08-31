@@ -1,15 +1,19 @@
 import { and, cosineDistance, desc, eq, sql, gt } from "drizzle-orm";
-import { createEmbedding } from "./embedding";
-import { connectionsSchema } from "~/server/db/schema";
+import { createEmbedding, createEmbeddingMany } from "./embedding";
+import { connectionsSchema, type TSelectUser } from "~/server/db/schema";
 import { db } from "~/server/db";
 
 export const searchSimilarConnections = async (
   query: string,
-  userID: string,
+  user: TSelectUser,
 ) => {
-  const { embedding } = await createEmbedding(query);
+  const {
+    embeddings: [queryEmbedding, userEmbedding],
+  } = await createEmbeddingMany([query, user.summary as string]);
 
-  const similarity = sql<number>`1 - (${cosineDistance(connectionsSchema.embedding, embedding)})`;
+  const querySimilarity = sql<number>`1 - (${cosineDistance(connectionsSchema.embedding, queryEmbedding!)})`;
+  const userSimilarity = sql<number>`1 - (${cosineDistance(connectionsSchema.embedding, userEmbedding!)})`;
+  const combinedScore = sql<number>`0.6 * ${querySimilarity!} + 0.4 * ${userSimilarity!}`; // bias towards query similarity
 
   return await db
     .select({
@@ -19,19 +23,13 @@ export const searchSimilarConnections = async (
       position: connectionsSchema.position,
       connectedOn: connectionsSchema.connectedOn,
       summary: connectionsSchema.summary,
-      similarity,
+      userSummary: sql<string>`${user.summary}`,
+      querySimilarity,
+      userSimilarity,
+      combinedScore,
     })
     .from(connectionsSchema)
-    .where(eq(connectionsSchema.userID, userID))
-    .orderBy((t) => desc(t.similarity))
+    .where(eq(connectionsSchema.userID, user.id))
+    .orderBy((t) => desc(t.combinedScore))
     .limit(4);
 };
-
-// console.log(
-//   await searchSimilarConnections(
-//     "want to connect with founders in b2b ai saas space",
-//     "1e9ce5d9-8993-409c-9b0c-9c2a5087dca6",
-//   ),
-// );
-
-// db.$client.end();
